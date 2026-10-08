@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Uptime Monitor</title>
+</head>
+<body>
+  <h1>Uptime Monitor</h1>
+
+  <form action="/add" method="post">
+    <input name="name" placeholder="Name" required>
+    <input name="url" type="url" placeholder="https://example.com" required>
+    <button type="submit">Add site</button>
+  </form>
+
+  <h2>Sites</h2>
+  <ul>
+    {% for site in sites %}
+      <li>
+        {{ site.name }}: {{ site.url }}
+        <form action="/delete/{{ site.id }}" method="post" style="display:inline">
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+    {% else %}
+      <li>No sites yet.</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

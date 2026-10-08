@@ -1,10 +1,51 @@
-from flask import Flask
+import os
+import sqlite3
+from flask import Flask, render_template, request, redirect
 
 app = Flask(__name__)
+DB_PATH = os.environ.get("DB_PATH", "uptime.db")
+
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def init_db():
+    with get_db() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS sites (
+                id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                url  TEXT NOT NULL
+            )
+        """)
+
 
 @app.route("/")
 def home():
-    return "Uptime Monitor is running!"
+    with get_db() as conn:
+        sites = conn.execute("SELECT * FROM sites").fetchall()
+    return render_template("index.html", sites=sites)
+
+
+@app.route("/add", methods=["POST"])
+def add_site():
+    name = request.form["name"]
+    url = request.form["url"]
+    with get_db() as conn:
+        conn.execute("INSERT INTO sites (name, url) VALUES (?, ?)", (name, url))
+    return redirect("/")
+
+
+@app.route("/delete/<int:site_id>", methods=["POST"])
+def delete_site(site_id):
+    with get_db() as conn:
+        conn.execute("DELETE FROM sites WHERE id = ?", (site_id,))
+    return redirect("/")
+
 
 if __name__ == "__main__":
+    init_db()
     app.run(host="0.0.0.0", port=5000, debug=True)
