@@ -2,6 +2,15 @@
 <html>
 <head>
   <title>Uptime Monitor</title>
+  <meta http-equiv="refresh" content="30">
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    table { border-collapse: collapse; margin-top: 1rem; }
+    th, td { border: 1px solid #ccc; padding: 6px 12px; text-align: left; }
+    .UP { color: green; font-weight: bold; }
+    .DOWN { color: red; font-weight: bold; }
+    .PENDING { color: gray; }
+  </style>
 </head>
 <body>
   <h1>Uptime Monitor</h1>
@@ -12,18 +21,29 @@
     <button type="submit">Add site</button>
   </form>
 
-  <h2>Sites</h2>
-  <ul>
+  <table>
+    <tr>
+      <th>Name</th><th>URL</th><th>Status</th><th>Code</th>
+      <th>Response</th><th>Uptime</th><th>Last check</th><th></th>
+    </tr>
     {% for site in sites %}
-      <li>
-        {{ site.name }}: {{ site.url }}
-        <form action="/delete/{{ site.id }}" method="post" style="display:inline">
-          <button type="submit">Delete</button>
-        </form>
-      </li>
+      <tr>
+        <td>{{ site.name }}</td>
+        <td>{{ site.url }}</td>
+        <td class="{{ site.status or 'PENDING' }}">{{ site.status or 'PENDING' }}</td>
+        <td>{{ site.status_code or '-' }}</td>
+        <td>{% if site.response_time_ms %}{{ site.response_time_ms }} ms{% else %}-{% endif %}</td>
+        <td>{% if site.uptime is not none %}{{ site.uptime }}%{% else %}-{% endif %}</td>
+        <td>{{ site.checked_at or '-' }}</td>
+        <td>
+          <form action="/delete/{{ site.id }}" method="post">
+            <button type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
     {% else %}
-      <li>No sites yet.</li>
+      <tr><td colspan="8">No sites yet.</td></tr>
     {% endfor %}
-  </ul>
+  </table>
 </body>
 </html>
