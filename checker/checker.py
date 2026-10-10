@@ -38,17 +38,36 @@ def check_site(url):
         return "DOWN", None, None
 
 
+def get_last_status(conn, site_id):
+    row = conn.execute(
+        "SELECT status FROM checks WHERE site_id = ? ORDER BY id DESC LIMIT 1",
+        (site_id,),
+    ).fetchone()
+    return row["status"] if row else None
+
+
+def send_alert(message):
+    print(f"*** ALERT: {message} ***")
+
+
 def run_checks():
     with get_db() as conn:
         sites = conn.execute("SELECT * FROM sites").fetchall()
         for site in sites:
+            previous = get_last_status(conn, site["id"])
             status, code, ms = check_site(site["url"])
+
             conn.execute(
                 "INSERT INTO checks (site_id, status, status_code, response_time_ms) "
                 "VALUES (?, ?, ?, ?)",
                 (site["id"], status, code, ms),
             )
             print(f"{site['name']}: {status} ({code}, {ms} ms)")
+
+            if previous == "UP" and status == "DOWN":
+                send_alert(f"{site['name']} is DOWN ({site['url']})")
+            elif previous == "DOWN" and status == "UP":
+                send_alert(f"{site['name']} is back UP ({site['url']})")
 
 
 if __name__ == "__main__":
