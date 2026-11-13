@@ -16,6 +16,13 @@ def get_db():
 def init_db():
     with get_db() as conn:
         conn.execute("""
+            CREATE TABLE IF NOT EXISTS sites (
+                id   INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                url  TEXT NOT NULL
+            )
+        """)
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS checks (
                 id               INTEGER PRIMARY KEY AUTOINCREMENT,
                 site_id          INTEGER NOT NULL,
@@ -25,6 +32,7 @@ def init_db():
                 checked_at       TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+
 
 
 def check_site(url):
