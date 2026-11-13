@@ -7,5 +7,12 @@ pipeline {
                 sh 'python3 -m py_compile web/app.py checker/checker.py'
             }
         }
+        stage('Static analysis') {
+            steps {
+                sh 'python3 -m pyflakes web/app.py checker/checker.py'
+            }
+        }
+
     }
+    
 }
