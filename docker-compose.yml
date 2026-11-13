@@ -1,0 +1,24 @@
+name: uptime-monitor
+
+services:
+  web:
+    build: ./web
+    ports:
+      - "5000:5000"
+    environment:
+      DB_PATH: /data/uptime.db
+    volumes:
+      - uptime-data:/data
+    restart: unless-stopped
+
+  checker:
+    build: ./checker
+    environment:
+      DB_PATH: /data/uptime.db
+      CHECK_INTERVAL: "10"
+    volumes:
+      - uptime-data:/data
+    restart: unless-stopped
+
+volumes:
+  uptime-data:
