@@ -15,6 +15,13 @@ pipeline {
                 sh 'python3 -m pyflakes web/app.py checker/checker.py'
             }
         }
+        stage('Docker build') {
+            steps {
+                sh 'docker compose config --quiet'
+                sh 'docker compose build'
+            }
+        }
+
 
     }
     
